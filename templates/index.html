@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="landing">
+  <h1>Programmazione Interrogazioni</h1>
+  <p>Gestisci le interrogazioni in modo semplice e intuitivo.</p>
+  <div class="button-group">
+    <a href="{{ url_for('create_room') }}" class="btn btn-primary">Crea Stanza</a>
+    <a href="{{ url_for('join_room') }}" class="btn btn-info">Entra in Stanza</a>
+  </div>
+</div>
+{% endblock %}

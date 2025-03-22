@@ -1,0 +1,235 @@
+/* Reset e impostazioni base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/* Container centrale */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Form Container */
+.form-container {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+/* Landing Page */
+.landing {
+  text-align: center;
+  margin: 50px 0;
+}
+
+.landing h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.landing p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+/* Pulsanti */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #004494;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Gruppi di Pulsanti */
+.button-group a {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Forza lo stile per il datepicker */
+input[type="date"] {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* Liste e Pool */
+.list-group {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 10px;
+}
+
+.list-group-item {
+  background-color: white;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+/* Badge per l'ordine */
+.order-indicator {
+  background-color: #0056b3;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 0.9rem;
+}
+
+/* Pool container per la selezione date */
+.pool-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.pool {
+  flex: 1;
+}
+
+.pool h5 {
+  margin-bottom: 10px;
+}
+
+/* Schedule Table */
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.schedule-table th, .schedule-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.schedule-table th {
+  background-color: #0056b3;
+  color: #fff;
+}
+
+/* Alerts */
+.alert {
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.alert-info {
+  background-color: #e9f7fd;
+  color: #31708f;
+}
+
+.alert-success {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .pool-container {
+    flex-direction: column;
+  }
+  .landing h1 {
+    font-size: 2rem;
+  }
+  .landing p {
+    font-size: 1rem;
+  }
+}

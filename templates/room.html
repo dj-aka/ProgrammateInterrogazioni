@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+{% block title %}Stanza {{ room_code }}{% endblock %}
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script>
+    let allDates = {{ room.dates|tojson }};
+  </script>
+  <style>
+    /* Rimuovo il gradiente e uso uno stile semplice per l'indicatore d'ordine */
+    .order-indicator {
+      background-color: #0056b3;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2 class="mb-4">Stanza {{ room_code }}</h2>
+  
+  {% if not session.get('name') and session.get('role') != 'creator' %}
+    <div class="alert alert-info">
+      <p>Inserisci il tuo nome per partecipare:</p>
+      <form method="POST" action="{{ url_for('join_room') }}">
+        <div class="form-group">
+          <input type="text" id="name" name="name" class="form-control" placeholder="Il tuo nome" required>
+          <input type="hidden" name="room_code" value="{{ room_code }}">
+        </div>
+        <button type="submit" class="btn btn-success btn-block">Partecipa</button>
+      </form>
+    </div>
+  {% endif %}
+  
+  {% if session.get('role') == 'creator' %}
+    <div class="creator-section">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?data={{ url_for('room', room_code=room_code, _external=True) }}&size=150x150" alt="QR Code" class="qr-code" style="display:block; margin:0 auto;">
+      <p style="text-align:center; margin-top:10px;">Condividi questo QR code con i tuoi compagni.</p>
+      <form method="POST" action="{{ url_for('schedule', room_code=room_code) }}" style="margin-top:20px;">
+        <button type="submit" class="btn btn-info btn-block">Genera Programmazione</button>
+      </form>
+    </div>
+  {% endif %}
+  
+  {% if session.get('role') == 'participant' %}
+    {% set saved = [] %}
+    {% for p in room.participants %}
+      {% if p.name == session.get('name') and p.preferences %}
+        {% set saved = p.preferences %}
+      {% endif %}
+    {% endfor %}
+    <div class="participant-section">
+      {% if saved|length > 0 %}
+        <div class="alert alert-success">
+          Le tue preferenze sono state salvate!
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          Ordina le date trascinando gli elementi per indicare la tua priorità (1° = la tua prima scelta, 2° = seconda scelta, ecc.).<br>
+          Assicurati che tutte le date siano presenti.
+        </div>
+      {% endif %}
+      <form method="POST" id="prefs-form">
+        <input type="hidden" name="name" value="{{ session.get('name') }}">
+        <ul id="preference-list" class="list-group">
+          {% if saved|length > 0 %}
+            {% for date in saved %}
+              <li class="list-group-item" data-date="{{ date }}">
+                <span class="order-indicator"></span>{{ date|format_date_pref }} - 
+                {% set cap = (room.dates | selectattr('date', 'equalto', date) | first).capacity %}
+                {{ cap }} Persone
+              </li>
+            {% endfor %}
+          {% else %}
+            {% for date_obj in room.dates %}
+              <li class="list-group-item" data-date="{{ date_obj.date }}">
+                <span class="order-indicator"></span>{{ date_obj.date|format_date_pref }} - {{ date_obj.capacity }} Persone
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+        <div id="preferences-inputs"></div>
+        <button type="submit" id="save-btn" class="btn btn-primary btn-block" style="margin-top:15px;" disabled>
+          {% if saved|length > 0 %}
+            Riinvia Preferenze
+          {% else %}
+            Salva Preferenze
+          {% endif %}
+        </button>
+      </form>
+    </div>
+  {% endif %}
+  
+  <hr>
+  <h3>Partecipanti</h3>
+  <ul id="participants-list" class="list-group">
+    {% for participant in room.participants %}
+      <li class="list-group-item" data-name="{{ participant.name }}">
+        {{ participant.name }}
+        {% if participant.preferences|length > 0 %}
+          <span class="badge badge-success float-right">inviato</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+var totalDates = {{ room.dates|length }};
+var preferenceList = document.getElementById('preference-list');
+
+// Aggiorna gli indicatori d'ordine
+function updateOrderIndicators() {
+  var items = preferenceList.querySelectorAll("li");
+  items.forEach((item, index) => {
+    let indicator = item.querySelector('.order-indicator');
+    if (!indicator) {
+      indicator = document.createElement("span");
+      indicator.className = "order-indicator";
+      item.insertBefore(indicator, item.firstChild);
+    }
+    indicator.textContent = (index + 1) + ". ";
+  });
+}
+
+// Inizializza Sortable sulla lista delle preferenze
+Sortable.create(preferenceList, {
+  animation: 150,
+  onEnd: function(evt) {
+    updateOrderIndicators();
+    checkAllSelected();
+  }
+});
+
+// Abilita il pulsante di salvataggio se il numero di elementi è corretto
+function checkAllSelected() {
+  var count = preferenceList.querySelectorAll("li").length;
+  var saveBtn = document.getElementById("save-btn");
+  saveBtn.disabled = (count !== totalDates);
+}
+
+var form = document.getElementById("prefs-form");
+if(form) {
+  form.addEventListener("submit", function(e) {
+    var items = preferenceList.querySelectorAll("li");
+    var container = document.getElementById("preferences-inputs");
+    container.innerHTML = "";
+    items.forEach(function(item) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "preference[]";
+      input.value = item.getAttribute("data-date");
+      container.appendChild(input);
+    });
+  });
+}
+
+updateOrderIndicators();
+checkAllSelected();
+
+function updateParticipants() {
+    fetch("{{ url_for('participants', room_code=room_code) }}")
+      .then(response => response.json())
+      .then(data => {
+          const list = document.getElementById("participants-list");
+          list.innerHTML = "";
+          data.participants.forEach(function(part) {
+              const li = document.createElement("li");
+              li.className = "list-group-item";
+              li.setAttribute("data-name", part.name);
+              li.textContent = part.name;
+              if(part.submitted) {
+                  const badge = document.createElement("span");
+                  badge.className = "badge badge-success float-right";
+                  badge.textContent = "inviato";
+                  li.appendChild(badge);
+              }
+              list.appendChild(li);
+          });
+      })
+      .catch(err => console.error(err));
+}
+setInterval(updateParticipants, 5000);
+</script>
+{% endblock %}

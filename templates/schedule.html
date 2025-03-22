@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}Programmazione - Stanza {{ room_code }}{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Programmazione per la Stanza {{ room_code }}</h2>
+  <p class="text-muted">Scarica il PDF con la programmazione completa.</p>
+  <table class="schedule-table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Partecipanti</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for date, participants in room.schedule.items() %}
+      <tr>
+        <td>{{ date|format_date_pref }}</td>
+        <td>
+          {% if participants %}
+          <ul>
+            {% for name in participants %}
+            <li>{{ name }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          Nessun partecipante assegnato
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="button-group">
+    <a href="{{ url_for('downloadpdf', room_code=room_code) }}" class="btn btn-success btn-block">Scarica PDF</a>
+    {% if session.get('role') == 'creator' %}
+    <a href="{{ url_for('room', room_code=room_code) }}" class="btn btn-secondary btn-block">Torna alla Selezione Date</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

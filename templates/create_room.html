@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block title %}Crea Stanza{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Crea una Nuova Stanza</h2>
+  <p>Inserisci le date disponibili e il numero massimo di studenti per ciascuna data.<br>
+     Se aggiungi una data per sbaglio, clicca sulla “×” per rimuoverla.</p>
+  <form method="POST">
+    <div class="form-group">
+      <label for="date-input">Seleziona Data:</label>
+      <input type="date" id="date-input" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="capacity-input">Capacità (numero massimo):</label>
+      <input type="number" id="capacity-input" class="form-control" min="1" placeholder="Es. 3">
+    </div>
+    <button type="button" id="add-date-btn" class="btn btn-secondary">Aggiungi Data</button>
+    <ul id="dates-list" class="list-group"></ul>
+    <!-- Campo hidden per inviare le date -->
+    <textarea name="dates" id="dates-hidden" style="display:none;"></textarea>
+    <button type="submit" class="btn btn-primary btn-block mt-3">Crea Stanza</button>
+  </form>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+let datesArray = [];
+const addDateBtn = document.getElementById("add-date-btn");
+const dateInput = document.getElementById("date-input");
+const capacityInput = document.getElementById("capacity-input");
+const datesList = document.getElementById("dates-list");
+
+function updateDatesHidden() {
+  document.getElementById("dates-hidden").value = datesArray.map(d => `${d.date}, ${d.capacity}`).join("\n");
+}
+
+function checkInputs() {
+  if(dateInput.value && capacityInput.value && capacityInput.value > 0) {
+    addDateBtn.classList.replace("btn-secondary", "btn-success");
+  } else {
+    addDateBtn.classList.replace("btn-success", "btn-secondary");
+  }
+}
+
+dateInput.addEventListener("input", checkInputs);
+capacityInput.addEventListener("input", checkInputs);
+capacityInput.addEventListener("keydown", function(e) {
+  if(e.key === "Enter") {
+    e.preventDefault();
+    addDateBtn.click();
+  }
+});
+
+function createDateListItem(dateVal, capacityVal) {
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex justify-content-between align-items-center";
+  li.setAttribute("data-date", dateVal);
+  li.textContent = `${dateVal} (Capacità: ${capacityVal})`;
+  
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "btn btn-sm btn-danger";
+  removeBtn.textContent = "×";
+  removeBtn.addEventListener("click", function() {
+    datesArray = datesArray.filter(d => d.date !== dateVal || d.capacity != capacityVal);
+    li.remove();
+    updateDatesHidden();
+  });
+  li.appendChild(removeBtn);
+  return li;
+}
+
+addDateBtn.addEventListener("click", function() {
+  const dateVal = dateInput.value;
+  const capacityVal = capacityInput.value;
+  if(!dateVal || !capacityVal || capacityVal <= 0) {
+    alert("Inserisci una data valida e una capacità maggiore di zero.");
+    return;
+  }
+  datesArray.push({ date: dateVal, capacity: capacityVal });
+  const li = createDateListItem(dateVal, capacityVal);
+  datesList.appendChild(li);
+  updateDatesHidden();
+  dateInput.value = "";
+  capacityInput.value = "";
+  checkInputs();
+});
+</script>
+{% endblock %}

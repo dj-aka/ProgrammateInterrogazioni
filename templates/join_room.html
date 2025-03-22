@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Entra in Stanza{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Entra in una Stanza</h2>
+  <form method="POST">
+    <div class="form-group">
+      <label for="room_code">Codice Stanza:</label>
+      <input type="text" id="room_code" name="room_code" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label for="name">Il tuo Nome:</label>
+      <input type="text" id="name" name="name" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-info btn-block">Entra in Stanza</button>
+  </form>
+</div>
+{% endblock %}

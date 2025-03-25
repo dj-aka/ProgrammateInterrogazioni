@@ -1,0 +1,42 @@
+{% macro participants_list(room_code, id_suffix="") %}
+<div class="participants-container">
+  <ul id="participants-list-{{ id_suffix }}" class="list-group">
+    <!-- La lista verrà popolata via JavaScript -->
+  </ul>
+</div>
+
+<script>
+  function updateParticipants{{ id_suffix }}() {
+    fetch("{{ url_for('participants', room_code=room_code) }}?t=" + Date.now())
+      .then(response => response.json())
+      .then(data => {
+        const list = document.getElementById("participants-list-{{ id_suffix }}");
+        list.innerHTML = "";
+        data.participants.forEach(function(part) {
+          const li = document.createElement("li");
+          li.className = "list-group-item d-flex justify-content-between align-items-center"; 
+          li.setAttribute("data-name", part.name);
+
+          // Nome a sinistra (come in creator_room)
+          const nameSpan = document.createElement("span");
+          nameSpan.textContent = part.name;
+          li.appendChild(nameSpan);
+
+          // Badge a destra (esattamente come in creator_room)
+          if (part.submitted) {
+            const badge = document.createElement("span");
+            badge.className = "badge badge-success ml-2";
+            badge.textContent = "inviato";
+            li.appendChild(badge);
+          }
+
+          list.appendChild(li);
+        });
+      })
+      .catch(err => console.error(err));
+  }
+
+  setInterval(updateParticipants{{ id_suffix }}, 2000);
+  updateParticipants{{ id_suffix }}();
+</script>
+{% endmacro %}

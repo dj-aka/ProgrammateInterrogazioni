@@ -232,4 +232,19 @@ input[type="date"] {
   .landing p {
     font-size: 1rem;
   }
+
+
+  .list-group-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+    border-radius: 4px !important;
+    order: 2; /* Forza il badge a destra */
+  }
+  
 }

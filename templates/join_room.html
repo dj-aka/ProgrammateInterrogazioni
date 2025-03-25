@@ -1,18 +1,132 @@
 {% extends "layout.html" %}
 {% block title %}Entra in Stanza{% endblock %}
+{% from "_participants_list.html" import participants_list %}
+{% block extra_head %}
+  <style>
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .input-blue {
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px;
+    }
+    .btn-block {
+      width: 100%;
+    }
+    .section {
+      text-align: center;
+      margin: 20px 0;
+    }
+    hr {
+      margin: 25px 0;
+    }
+    #participants-container {
+      display: none; /* Nascondi inizialmente */
+    }
+  </style>
+{% endblock %}
 {% block content %}
 <div class="form-container">
   <h2>Entra in una Stanza</h2>
   <form method="POST">
     <div class="form-group">
-      <label for="room_code">Codice Stanza:</label>
-      <input type="text" id="room_code" name="room_code" class="form-control" required>
+      <input type="text" id="room_code" name="room_code" class="form-control input-blue" placeholder="Codice Stanza" required
+             value="{{ room_code_prefill }}" {% if room_code_prefill %}readonly{% endif %}>
     </div>
     <div class="form-group">
-      <label for="name">Il tuo Nome:</label>
-      <input type="text" id="name" name="name" class="form-control" required>
+      <input type="text" id="name" name="name" class="form-control input-blue" placeholder="Il tuo nome" required>
     </div>
     <button type="submit" class="btn btn-info btn-block">Entra in Stanza</button>
   </form>
+
+  <hr>
+  
+  <div id="participants-container">
+    <h3 class="section">Partecipanti</h3>
+    <div id="dynamic-participants-list"></div>
+  </div>
 </div>
+
+<script>
+  document.getElementById('room_code').addEventListener('input', function() {
+    const roomCode = this.value.trim();
+    const container = document.getElementById('participants-container');
+    const listContainer = document.getElementById('dynamic-participants-list');
+    
+    if (roomCode.length > 0) {
+      // Mostra il container
+      container.style.display = 'block';
+      
+      // Aggiorna la lista partecipanti
+      updateParticipantsList(roomCode, listContainer);
+      
+      // Imposta l'aggiornamento periodico
+      if (window.participantsInterval) {
+        clearInterval(window.participantsInterval);
+      }
+      window.participantsInterval = setInterval(() => {
+        updateParticipantsList(roomCode, listContainer);
+      }, 2000);
+    } else {
+      container.style.display = 'none';
+      if (window.participantsInterval) {
+        clearInterval(window.participantsInterval);
+      }
+    }
+  });
+
+  function updateParticipantsList(roomCode, container) {
+    fetch(`/participants/${roomCode}?t=${Date.now()}`)
+      .then(response => response.json())
+      .then(data => {
+        container.innerHTML = '';
+        const ul = document.createElement('ul');
+        ul.className = 'list-group';
+        
+        data.participants.forEach(part => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = part.name;
+          li.appendChild(nameSpan);
+
+          if (part.submitted) {
+            const badge = document.createElement('span');
+            badge.className = 'badge badge-success ml-2';
+            badge.textContent = 'inviato';
+            li.appendChild(badge);
+          }
+
+          ul.appendChild(li);
+        });
+        
+        container.appendChild(ul);
+      })
+      .catch(err => {
+        console.error('Errore nel recupero partecipanti:', err);
+        container.innerHTML = '<p class="text-muted">Nessun partecipante trovato</p>';
+      });
+  }
+
+  // Se c'è un codice precompilato, mostra subito i partecipanti
+  {% if room_code_prefill %}
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('participants-container').style.display = 'block';
+      updateParticipantsList('{{ room_code_prefill }}', document.getElementById('dynamic-participants-list'));
+      window.participantsInterval = setInterval(() => {
+        updateParticipantsList('{{ room_code_prefill }}', document.getElementById('dynamic-participants-list'));
+      }, 2000);
+    });
+  {% endif %}
+</script>
 {% endblock %}

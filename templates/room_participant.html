@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+{% block title %}Room Partecipante – Stanza {{ room_code }}{% endblock %}
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script>
+    let allDates = {{ room.dates|tojson }};
+  </script>
+  <style>
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .order-indicator {
+      background-color: #0056b3;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .btn-block {
+      width: 100%;
+    }
+    .list-group-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #333;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2 class="mb-4">Room: {{ room_code }}</h2>
+  <div class="alert alert-info">Ordina le date trascinando gli elementi per indicare la tua priorità.</div>
+  <form method="POST" id="prefs-form">
+    <input type="hidden" name="name" value="{{ session.get('name') }}">
+    <ul id="preference-list" class="list-group">
+      {% set participant = room.participants|selectattr("name", "equalto", session.get('name'))|list|first %}
+      {% if participant and participant.preferences %}
+        {% for date in participant.preferences %}
+          <li class="list-group-item" data-date="{{ date }}">
+            <span class="order-indicator"></span>{{ date|format_date_pref }} – {{ (room.dates | selectattr('date', 'equalto', date) | list | first).capacity }}
+          </li>
+        {% endfor %}
+      {% else %}
+        {% for date_obj in room.dates %}
+          <li class="list-group-item" data-date="{{ date_obj.date }}">
+            <span class="order-indicator"></span>{{ date_obj.date|format_date_pref }} – {{ date_obj.capacity }}
+          </li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+    <div id="preferences-inputs"></div>
+    <button type="submit" id="save-btn" class="btn btn-primary btn-block mt-3" disabled>Salva Preferenze</button>
+  </form>
+  <hr>
+  <h3>Partecipanti</h3>
+  <ul id="participants-list" class="list-group"></ul>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+var totalDates = {{ room.dates|length }};
+var preferenceList = document.getElementById('preference-list');
+
+function updateOrderIndicators() {
+  var items = preferenceList.querySelectorAll("li");
+  items.forEach((item, index) => {
+    let indicator = item.querySelector('.order-indicator');
+    if (!indicator) {
+      indicator = document.createElement("span");
+      indicator.className = "order-indicator";
+      item.insertBefore(indicator, item.firstChild);
+    }
+    indicator.textContent = (index + 1) + ". ";
+  });
+}
+
+Sortable.create(preferenceList, {
+  animation: 150,
+  onEnd: function() {
+    updateOrderIndicators();
+    checkAllSelected();
+  }
+});
+
+function checkAllSelected() {
+  var count = preferenceList.querySelectorAll("li").length;
+  var saveBtn = document.getElementById("save-btn");
+  saveBtn.disabled = (count !== totalDates);
+}
+
+var form = document.getElementById("prefs-form");
+if(form) {
+  form.addEventListener("submit", function(e) {
+    var items = preferenceList.querySelectorAll("li");
+    var container = document.getElementById("preferences-inputs");
+    container.innerHTML = "";
+    items.forEach(function(item) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "preference[]";
+      input.value = item.getAttribute("data-date");
+      container.appendChild(input);
+    });
+  });
+}
+
+updateOrderIndicators();
+checkAllSelected();
+
+function updateParticipants() {
+  fetch("{{ url_for('participants', room_code=room_code) }}" + "?t=" + Date.now())
+    .then(response => response.json())
+    .then(data => {
+      const list = document.getElementById("participants-list");
+      list.innerHTML = "";
+      data.participants.forEach(function(part) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.setAttribute("data-name", part.name);
+        li.textContent = part.name;
+        if(part.submitted) {
+          const badge = document.createElement("span");
+          badge.className = "badge badge-success float-right";
+          badge.textContent = "inviato";
+          li.appendChild(badge);
+        }
+        list.appendChild(li);
+      });
+    })
+    .catch(err => console.error(err));
+}
+setInterval(updateParticipants, 2000);
+updateParticipants();
+</script>
+{% endblock %}

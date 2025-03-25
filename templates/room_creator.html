@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% from "_participants_list.html" import participants_list %}
+{% block title %}Room Creatore – Stanza {{ room_code }}{% endblock %}
+{% block extra_head %}
+  <style>
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .room-code {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .btn-block {
+      width: 100%;
+    }
+    .creator-info img {
+      max-width: 150px;
+      margin: 0 auto 10px;
+      display: block;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+  <div class="room-header section">
+    <div class="room-code">Stanza: {{ room_code }}</div>
+  </div>
+  <div class="creator-info section">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?data={{ url_for('join_room', room_code=room_code, _external=True) }}&size=150x150" alt="QR Code">
+    <button type="button" class="btn btn-info btn-block" style="margin-top:10px;" onclick="location.href='{{ url_for('schedule', room_code=room_code) }}'">Genera Programmate</button>
+  </div>
+  <hr>
+  <h3 class="section">Partecipanti</h3>
+  {{ participants_list(room_code) }}
+</div>
+{% endblock %}

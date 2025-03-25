@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% from "_participants_list.html" import participants_list %}
+{% block title %}Attendi...{% endblock %}
+{% block extra_head %}
+  <style>
+    .form-container {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .btn-block {
+      width: 100%;
+    }
+    .participants-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Preferenze Inviate!</h2>
+  <p>Attendi che il creatore generi la programmazione.</p>
+  <a href="{{ url_for('modify_preferences', room_code=room_code) }}" class="btn btn-secondary btn-block" style="margin-top:20px;">Modifica Preferenze</a>
+  
+  <div class="participants-section">
+    <h3>Partecipanti</h3>
+    {{ participants_list(room_code, "waiting") }}
+  </div>
+</div>
+{% endblock %}

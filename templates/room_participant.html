@@ -14,14 +14,11 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    /* Stile aggiornato per l'indicatore d'ordine: nessun cerchio, semplice testo a destra della data */
     .order-indicator {
-      background-color: #0056b3;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 50%;
-      margin-right: 10px;
+      color: #0056b3;
       font-size: 0.9rem;
-      flex-shrink: 0;
+      margin-left: 10px;
     }
     .btn-block {
       width: 100%;
@@ -37,6 +34,11 @@
       background-color: #fff;
       color: #333;
     }
+    /* All'interno dell'item, per separare la parte centrale (data + indicatore) dalla capacità */
+    .date-container {
+      display: flex;
+      align-items: center;
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -50,13 +52,21 @@
       {% if participant and participant.preferences %}
         {% for date in participant.preferences %}
           <li class="list-group-item" data-date="{{ date }}">
-            <span class="order-indicator"></span>{{ date|format_date_pref }} – {{ (room.dates | selectattr('date', 'equalto', date) | list | first).capacity }}
+            <div class="date-container">
+              {{ date|format_date_pref }}
+              <span class="order-indicator"></span>
+            </div>
+            – {{ (room.dates | selectattr('date', 'equalto', date) | list | first).capacity }}
           </li>
         {% endfor %}
       {% else %}
         {% for date_obj in room.dates %}
           <li class="list-group-item" data-date="{{ date_obj.date }}">
-            <span class="order-indicator"></span>{{ date_obj.date|format_date_pref }} – {{ date_obj.capacity }}
+            <div class="date-container">
+              {{ date_obj.date|format_date_pref }}
+              <span class="order-indicator"></span>
+            </div>
+            – {{ date_obj.capacity }}
           </li>
         {% endfor %}
       {% endif %}
@@ -81,9 +91,10 @@ function updateOrderIndicators() {
     if (!indicator) {
       indicator = document.createElement("span");
       indicator.className = "order-indicator";
-      item.insertBefore(indicator, item.firstChild);
+      // Invece di insertBefore, qui ci assicuriamo che l'indicatore sia all'interno del container già presente
+      item.querySelector('.date-container').appendChild(indicator);
     }
-    indicator.textContent = (index + 1) + ". ";
+    indicator.textContent = (index + 1) + ".";
   });
 }
 

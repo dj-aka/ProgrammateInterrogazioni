@@ -1,35 +1,70 @@
 {% extends "layout.html" %}
 {% block title %}Programmazione - Stanza {{ room_code }}{% endblock %}
+{% block extra_head %}
+  <style>
+    .form-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    .schedule-table {
+      width: 100%;
+      margin-bottom: 20px;
+      border-collapse: collapse;
+    }
+    .schedule-table th,
+    .schedule-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .schedule-table thead th {
+      background-color: #17a2b8;
+      font-weight: 600;
+    }
+    .schedule-table tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+    .button-group a {
+      margin-top: 10px;
+    }
+  </style>
+{% endblock %}
 {% block content %}
 <div class="form-container">
-  <h2>Programmazione per la Stanza {{ room_code }}</h2>
-  <p class="text-muted">Scarica il PDF con la programmazione completa.</p>
-  <table class="schedule-table">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Partecipanti</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for date, participants in room.schedule.items() %}
-      <tr>
-        <td>{{ date|format_date_pref }}</td>
-        <td>
-          {% if participants %}
-          <ul>
-            {% for name in participants %}
-            <li>{{ name }}</li>
-            {% endfor %}
-          </ul>
-          {% else %}
-          Nessun partecipante assegnato
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <h2 class="mb-3">Programmazione per la Stanza {{ room_code }}</h2>
+  <p class="text-muted mb-4">Visualizza qui la programmazione e scarica il PDF completo.</p>
+  <div class="table-responsive">
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Partecipanti</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for date, participants in room.schedule.items() %}
+        <tr>
+          <td>{{ date|format_date_pref }}</td>
+          <td>
+            {% if participants %}
+            <ul class="list-unstyled mb-0">
+              {% for name in participants %}
+              <li>{{ name }}</li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <em>Nessun partecipante assegnato</em>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <div class="button-group">
     <a href="{{ url_for('downloadpdf', room_code=room_code) }}" class="btn btn-success btn-block">Scarica PDF</a>
     {% if session.get('role') == 'creator' %}

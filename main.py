@@ -22,13 +22,13 @@ def generate_room_code(length=6):
 @app.template_filter('day_of_week')
 def day_of_week(date_str):
     mapping = {
-        'Monday': 'Lunedì',
-        'Tuesday': 'Martedì',
-        'Wednesday': 'Mercoledì',
-        'Thursday': 'Giovedì',
-        'Friday': 'Venerdì',
-        'Saturday': 'Sabato',
-        'Sunday': 'Domenica'
+        'Monday': 'LUNEDÌ',
+        'Tuesday': 'MARTEDÌ',
+        'Wednesday': 'MERCOLEDÌ',
+        'Thursday': 'GIOVEDÌ',
+        'Friday': 'VENERDÌ',
+        'Saturday': 'SABATO',
+        'Sunday': 'DOMENICA'
     }
     try:
         dt = datetime.strptime(date_str, '%Y-%m-%d')
@@ -40,7 +40,7 @@ def day_of_week(date_str):
 def format_date_pref(date_str):
     try:
         dt = datetime.strptime(date_str, '%Y-%m-%d')
-        mapping = {
+        day_mapping = {
             'Monday': 'LUNEDÌ',
             'Tuesday': 'MARTEDÌ',
             'Wednesday': 'MERCOLEDÌ',
@@ -49,8 +49,23 @@ def format_date_pref(date_str):
             'Saturday': 'SABATO',
             'Sunday': 'DOMENICA'
         }
-        day_name = mapping.get(dt.strftime('%A'), dt.strftime('%A').upper())
-        return f"{day_name} {dt.day} {dt.strftime('%B').lower()}"
+        month_mapping = {
+            'January': 'gennaio',
+            'February': 'febbraio',
+            'March': 'marzo',
+            'April': 'aprile',
+            'May': 'maggio',
+            'June': 'giugno',
+            'July': 'luglio',
+            'August': 'agosto',
+            'September': 'settembre',
+            'October': 'ottobre',
+            'November': 'novembre',
+            'December': 'dicembre'
+        }
+        day_name = day_mapping.get(dt.strftime('%A'), dt.strftime('%A').upper())
+        month_name = month_mapping.get(dt.strftime('%B'), dt.strftime('%B').lower())
+        return f"{day_name} {dt.day} {month_name}"
     except Exception:
         return date_str
 
